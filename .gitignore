@@ -12,3 +12,7 @@ __pycache__/
 *.log
 *.wav
 *.mp3
+.flatpak-builder/
+build-dir/
+repo/
+*.flatpak

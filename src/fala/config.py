@@ -23,6 +23,8 @@ class Config:
     paste_keys: str = "ctrl+v"
     audio_device: str = ""
     max_seconds: int = 300
+    shortcut: str = "LOGO+d"
+    autostart: bool = True
 
     def __post_init__(self):
         if self.transcriber not in DEFAULT_WHISPER_MODELS:

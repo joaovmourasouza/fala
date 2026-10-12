@@ -1,22 +1,24 @@
 import enum
-import shutil
+import os
 import signal
-import subprocess
 import sys
 import threading
+import time
+from pathlib import Path
 
 import numpy as np
 from PyQt6.QtCore import QObject, Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QAction, QColor, QIcon, QPainter, QPixmap
 from PyQt6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
 
-from . import inject
+from . import history, host, inject, portal
 from .audio import SAMPLE_RATE, Recorder
 from .cleanup import Cleaner, claude_available
 from .config import Config
 from .ipc import CommandServer
 from .overlay import Overlay
 from .transcribe import make_transcriber
+from .window import MainWindow
 
 MIN_AUDIO_SECONDS = 0.3
 
@@ -27,10 +29,17 @@ class State(enum.Enum):
     PROCESSING = enum.auto()
 
 
+# Segurar o atalho por mais que isso = modo segurar-para-falar; menos = liga/desliga.
+HOLD_SECONDS = 0.4
+AUTOSTART_FILE = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")) / "autostart" / f"{portal.APP_ID}.desktop"
+
+
 def notify(message: str) -> None:
     print(f"fala: {message}", file=sys.stderr)
-    if shutil.which("notify-send"):
-        subprocess.Popen(["notify-send", "--app-name=Fala", "Fala", message])
+    try:
+        host.notify("Fala", message)
+    except Exception as e:
+        print(f"fala: notificação falhou: {e}", file=sys.stderr)
 
 
 def _tray_icon(color: QColor) -> QIcon:
@@ -52,6 +61,9 @@ class Fala(QObject):
     level = pyqtSignal(float)
     status = pyqtSignal(str)
     finished = pyqtSignal(str, str)  # texto final, mensagem de aviso/erro
+    recorded = pyqtSignal()  # um ditado novo foi salvo no histórico
+    shortcut_pressed = pyqtSignal()
+    shortcut_released = pyqtSignal()
 
     def __init__(self, config: Config):
         super().__init__()
@@ -72,8 +84,19 @@ class Fala(QObject):
         self.max_timer = QTimer(self, singleShot=True)
         self.max_timer.timeout.connect(self.stop)
 
+        self.window = MainWindow()
+        self.window.quit_requested.connect(QApplication.quit)
+        self.recorded.connect(self._on_recorded)
+
+        self._key_down = False
+        self._pressed_at = 0.0
+        self._started_by_press = False
+        self.shortcut_pressed.connect(self._on_shortcut_pressed)
+        self.shortcut_released.connect(self._on_shortcut_released)
+
         self._setup_tray()
-        threading.Thread(target=self._warmup, daemon=True).start()
+        for target in (self._warmup, self._run_shortcut, self._prepare_keyboard, self._setup_background):
+            threading.Thread(target=target, daemon=True).start()
 
     def _setup_tray(self) -> None:
         self.tray = None
@@ -82,6 +105,7 @@ class Fala(QObject):
         self._idle_icon = _tray_icon(QColor(200, 200, 200))
         self._rec_icon = _tray_icon(QColor(230, 60, 60))
         menu = QMenu()
+        menu.addAction(QAction("Abrir Fala", menu, triggered=self.show_window))
         menu.addAction(QAction("Ditar / parar", menu, triggered=self.toggle))
         menu.addAction(QAction("Sair", menu, triggered=QApplication.quit))
         self.tray = QSystemTrayIcon(self._idle_icon, self)
@@ -101,16 +125,74 @@ class Fala(QObject):
         except Exception as e:
             notify(f"Transcrição indisponível: {e}")
 
+    def _run_shortcut(self) -> None:
+        shortcut = portal.GlobalShortcut(
+            "ditar", "Ditar com o Fala", self.config.shortcut,
+            on_press=self.shortcut_pressed.emit, on_release=self.shortcut_released.emit,
+        )
+        try:
+            shortcut.run()
+        except Exception as e:
+            notify(f"Não foi possível registrar o atalho global: {e}")
+
+    def _prepare_keyboard(self) -> None:
+        # Na primeira vez o GNOME pergunta se o Fala pode controlar o teclado (para colar o texto).
+        try:
+            inject.prepare()
+        except Exception as e:
+            notify(f"Sem permissão para digitar nas janelas; o texto só será copiado ({e}).")
+
+    def _setup_background(self) -> None:
+        try:
+            if portal.IN_FLATPAK:
+                portal.request_background("Para ditar com o atalho a qualquer momento.", ["fala", "--background"])
+            elif self.config.autostart and not AUTOSTART_FILE.exists():
+                AUTOSTART_FILE.parent.mkdir(parents=True, exist_ok=True)
+                AUTOSTART_FILE.write_text(
+                    "[Desktop Entry]\nType=Application\nName=Fala\n"
+                    f"Exec={Path(sys.argv[0]).resolve()} --background\n"
+                    f"Icon={portal.APP_ID}\nX-GNOME-Autostart-enabled=true\n"
+                )
+            portal.set_background_status("Pronto para ditar")
+        except Exception as e:
+            print(f"fala: não foi possível configurar o segundo plano: {e}", file=sys.stderr)
+
+    def _on_shortcut_pressed(self) -> None:
+        if self._key_down:  # repetição da tecla segurada
+            return
+        self._key_down = True
+        self._pressed_at = time.monotonic()
+        if self.state == State.IDLE:
+            self.start()
+            self._started_by_press = self.state == State.RECORDING
+        elif self.state == State.RECORDING:
+            self.stop()
+
+    def _on_shortcut_released(self) -> None:
+        self._key_down = False
+        held = time.monotonic() - self._pressed_at
+        if self._started_by_press and held >= HOLD_SECONDS:
+            self.stop()
+        self._started_by_press = False
+
     def handle_command(self, cmd: str) -> None:
         actions = {
             "toggle": self.toggle,
             "start": self.start,
             "stop": self.stop,
             "cancel": self.cancel,
+            "show": self.show_window,
             "quit": QApplication.quit,
         }
         if cmd in actions:
             actions[cmd]()
+
+    def show_window(self) -> None:
+        self.window.show_and_raise()
+
+    def _on_recorded(self) -> None:
+        if self.window.isVisible():
+            self.window.refresh()
 
     def toggle(self) -> None:
         if self.state == State.IDLE:
@@ -157,14 +239,20 @@ class Fala(QObject):
         except Exception as e:
             self.finished.emit("", f"Falha na transcrição: {e}")
             return
-        if not raw or self.cleaner is None:
-            self.finished.emit(raw, "")
-            return
-        self.status.emit("Ajustando texto…")
-        try:
-            self.finished.emit(self.cleaner.clean(raw), "")
-        except Exception as e:
-            self.finished.emit(raw, f"Ajuste com IA falhou, usei o texto bruto: {e}")
+        text, category, message = raw, "outro", ""
+        if raw and self.cleaner is not None:
+            self.status.emit("Ajustando texto…")
+            try:
+                text, category = self.cleaner.clean(raw)
+            except Exception as e:
+                message = f"Ajuste com IA falhou, usei o texto bruto: {e}"
+        if text:
+            try:
+                history.add(len(audio) / SAMPLE_RATE, raw, text, category)
+                self.recorded.emit()
+            except Exception as e:
+                print(f"fala: não foi possível salvar no histórico: {e}", file=sys.stderr)
+        self.finished.emit(text, message)
 
     def _on_finished(self, text: str, message: str) -> None:
         self.overlay.hide()
@@ -182,7 +270,7 @@ class Fala(QObject):
             notify(f"Não foi possível inserir o texto: {e}")
             return
         if not pasted:
-            notify("Texto copiado. Cole com Ctrl+V (instale o ydotool para colar automaticamente).")
+            notify("Texto copiado. Cole com Ctrl+V.")
 
     def _set_state(self, state: State) -> None:
         self.state = state
@@ -190,13 +278,15 @@ class Fala(QObject):
             self.tray.setIcon(self._rec_icon if state == State.RECORDING else self._idle_icon)
 
 
-def run(config: Config) -> int:
+def run(config: Config, background: bool = False) -> int:
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     # Precisa vir antes da QApplication: o Qt registra o app ID no portal do desktop ao iniciar.
     QApplication.setApplicationName("Fala")
-    QApplication.setDesktopFileName("fala")
+    QApplication.setDesktopFileName(portal.APP_ID)
     app = QApplication(sys.argv)
     app.setQuitOnLastWindowClosed(False)
-    fala = Fala(config)  # noqa: F841 — precisa viver enquanto o app roda
-    print("fala: pronto. Use `fala toggle` (ou o atalho configurado) para ditar.", file=sys.stderr)
+    fala = Fala(config)
+    if not background:
+        fala.show_window()
+    print("fala: pronto. Use o atalho (padrão Super+D) para ditar.", file=sys.stderr)
     return app.exec()

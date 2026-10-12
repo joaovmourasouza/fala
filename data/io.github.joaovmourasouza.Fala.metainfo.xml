@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.joaovmourasouza.Fala</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <name>Fala</name>
+  <summary>Ditado por voz em qualquer app</summary>
+  <description>
+    <p>Aperte um atalho, fale e o texto aparece no app em foco: transcrição com Whisper e ajuste com o Claude Code.</p>
+  </description>
+  <launchable type="desktop-id">io.github.joaovmourasouza.Fala.desktop</launchable>
+  <url type="homepage">https://github.com/joaovmourasouza/fala</url>
+  <developer id="io.github.joaovmourasouza">
+    <name>João Moura</name>
+  </developer>
+  <content_rating type="oars-1.1"/>
+  <releases>
+    <release version="0.1.0" date="2026-10-12"/>
+  </releases>
+</component>

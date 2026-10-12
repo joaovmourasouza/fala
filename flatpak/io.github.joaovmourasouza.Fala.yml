@@ -1,0 +1,68 @@
+id: io.github.joaovmourasouza.Fala
+runtime: org.freedesktop.Platform
+runtime-version: '25.08'
+sdk: org.freedesktop.Sdk
+command: fala
+finish-args:
+  - --share=ipc
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --device=dri
+  # Microfone
+  - --socket=pulseaudio
+  # Download do modelo Whisper e transcrição via Groq
+  - --share=network
+  # Imagem do painel exportada pelo botão Compartilhar
+  - --filesystem=xdg-pictures
+  - --talk-name=org.freedesktop.Notifications
+  # `claude -p` roda no sistema, com o login do Claude Code do usuário (flatpak-spawn --host)
+  - --talk-name=org.freedesktop.Flatpak
+
+modules:
+  - name: portaudio
+    buildsystem: autotools
+    config-opts:
+      - --disable-static
+      - --without-jack
+      - --without-oss
+    cleanup:
+      - /include
+      - /lib/pkgconfig
+      - '*.la'
+    sources:
+      - type: archive
+        url: https://files.portaudio.com/archives/pa_stable_v190700_20210406.tgz
+        sha256: 47efbf42c77c19a05d22e627d42873e991ec0c1357219c0d74ce6a2948cb2def
+
+  - name: wl-clipboard
+    buildsystem: meson
+    config-opts:
+      - -Dzshcompletiondir=no
+      - -Dfishcompletiondir=no
+    cleanup:
+      - /share/man
+      - /share/bash-completion
+    sources:
+      - type: archive
+        url: https://github.com/bugaevc/wl-clipboard/archive/refs/tags/v2.2.1.tar.gz
+        sha256: 6eb8081207fb5581d1d82c4bcd9587205a31a3d47bea3ebeb7f41aa1143783eb
+
+  - name: fala
+    buildsystem: simple
+    build-options:
+      # Baixa as dependências Python do PyPI durante o build (ok para builds locais).
+      build-args:
+        - --share=network
+    build-commands:
+      - pip3 install --prefix=${FLATPAK_DEST} --no-cache-dir '.[local]'
+      - install -Dm644 data/${FLATPAK_ID}.desktop ${FLATPAK_DEST}/share/applications/${FLATPAK_ID}.desktop
+      - install -Dm644 data/${FLATPAK_ID}.svg ${FLATPAK_DEST}/share/icons/hicolor/scalable/apps/${FLATPAK_ID}.svg
+      - install -Dm644 data/${FLATPAK_ID}.metainfo.xml ${FLATPAK_DEST}/share/metainfo/${FLATPAK_ID}.metainfo.xml
+    sources:
+      - type: dir
+        path: ..
+        skip:
+          - .venv
+          - .flatpak-builder
+          - build-dir
+          - repo

@@ -25,3 +25,10 @@ audio_device = ""
 
 # Para a gravação automaticamente depois de N segundos
 max_seconds = 300
+
+# Atalho global sugerido ao GNOME (formato xdg: LOGO = Super). Toque rápido liga/desliga;
+# segurar grava enquanto a tecla estiver apertada. Dá para trocar em Configurações > Teclado > Atalhos.
+shortcut = "LOGO+d"
+
+# Iniciar o Fala em segundo plano junto com a sessão
+autostart = true

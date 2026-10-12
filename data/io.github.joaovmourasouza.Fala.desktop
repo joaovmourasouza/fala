@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Fala
+Comment=Ditado por voz em qualquer app
+Exec=fala
+Icon=io.github.joaovmourasouza.Fala
+Terminal=false
+Categories=Utility;Accessibility;
+Keywords=ditado;voz;transcrição;whisper;dictation;voice;
+StartupNotify=false
