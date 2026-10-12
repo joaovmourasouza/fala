@@ -1033,9 +1033,9 @@ class MainWindow(QWidget):
     def _open_settings(self) -> None:
         if not CONFIG_PATH.exists():
             CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
-            example = Path(__file__).resolve().parents[2] / "config.example.toml"
+            example = Path(__file__).resolve().parent / "config.example.toml"
             CONFIG_PATH.write_text(
-                example.read_text() if example.exists() else "# Configuração do Fala — veja config.example.toml no repositório.\n"
+                example.read_text() if example.exists() else "# Configuração do Fala — veja src/fala/config.example.toml no repositório.\n"
             )
         QDesktopServices.openUrl(QUrl.fromLocalFile(str(CONFIG_PATH)))
 

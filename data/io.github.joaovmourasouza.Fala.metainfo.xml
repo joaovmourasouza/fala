@@ -3,19 +3,106 @@
   <id>io.github.joaovmourasouza.Fala</id>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>MIT</project_license>
+
   <name>Fala</name>
-  <summary>Ditado por voz em qualquer app</summary>
+  <summary>Voice dictation in any app</summary>
+  <summary xml:lang="pt_BR">Ditado por voz em qualquer app</summary>
+
   <description>
-    <p>Aperte um atalho, fale e o texto aparece no app em foco: transcrição com Whisper e ajuste com o Claude Code.</p>
-    <p>Sem API key: o claude do sistema é encontrado e ajusta o texto com o seu login do Claude Code.</p>
+    <p>
+      Press a shortcut, speak, and the text appears in the focused app. Fala transcribes your voice
+      with Whisper and polishes the text with Claude Code: punctuation, filler words removed and
+      self-corrections understood.
+    </p>
+    <p xml:lang="pt_BR">
+      Aperte um atalho, fale e o texto aparece no app em foco. O Fala transcreve sua voz com Whisper
+      e ajusta o texto com o Claude Code: pontuação, muletas removidas e autocorreções entendidas.
+    </p>
+    <p>
+      No API key needed: the claude command installed on your system is found and polishes the
+      text using your own Claude Code login.
+    </p>
+    <p xml:lang="pt_BR">
+      Sem API key: o claude do sistema é encontrado e ajusta o texto com o seu login do Claude Code.
+    </p>
+    <ul>
+      <li>Global shortcut: tap to start and stop, or hold to talk</li>
+      <li xml:lang="pt_BR">Atalho global: toque para começar e parar, ou segure para falar</li>
+      <li>Local speech recognition with Whisper, or the Groq API</li>
+      <li xml:lang="pt_BR">Reconhecimento de fala local com Whisper, ou pela API da Groq</li>
+      <li>Types into the focused window and keeps the text in the clipboard</li>
+      <li xml:lang="pt_BR">Digita na janela em foco e mantém o texto na área de transferência</li>
+      <li>Insights dashboard: words per minute, corrections, usage by text type and streaks</li>
+      <li xml:lang="pt_BR">Painel Insights: palavras por minuto, correções, uso por tipo de texto e sequência de dias</li>
+      <li>Runs in the background and starts with your session</li>
+      <li xml:lang="pt_BR">Roda em segundo plano e inicia junto com a sessão</li>
+    </ul>
+    <p>Requires Claude Code installed and logged in on the host system for text polishing.</p>
+    <p xml:lang="pt_BR">O ajuste do texto exige o Claude Code instalado e logado no sistema.</p>
   </description>
+
   <launchable type="desktop-id">io.github.joaovmourasouza.Fala.desktop</launchable>
+
   <url type="homepage">https://github.com/joaovmourasouza/fala</url>
+  <url type="bugtracker">https://github.com/joaovmourasouza/fala/issues</url>
+  <url type="vcs-browser">https://github.com/joaovmourasouza/fala</url>
+
   <developer id="io.github.joaovmourasouza">
     <name>João Moura</name>
   </developer>
+
+  <branding>
+    <color type="primary" scheme_preference="light">#E4E2F7</color>
+    <color type="primary" scheme_preference="dark">#3B3D8F</color>
+  </branding>
+
+  <screenshots>
+    <screenshot type="default">
+      <caption>Insights dashboard</caption>
+      <caption xml:lang="pt_BR">Painel Insights</caption>
+      <image>https://raw.githubusercontent.com/joaovmourasouza/fala/v0.1.0/data/screenshots/insights.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Dictation history</caption>
+      <caption xml:lang="pt_BR">Histórico de ditados</caption>
+      <image>https://raw.githubusercontent.com/joaovmourasouza/fala/v0.1.0/data/screenshots/historico.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Dark theme</caption>
+      <caption xml:lang="pt_BR">Tema escuro</caption>
+      <image>https://raw.githubusercontent.com/joaovmourasouza/fala/v0.1.0/data/screenshots/insights-escuro.png</image>
+    </screenshot>
+  </screenshots>
+
+  <categories>
+    <category>Utility</category>
+    <category>Accessibility</category>
+  </categories>
+
+  <keywords>
+    <keyword>dictation</keyword>
+    <keyword>voice</keyword>
+    <keyword>speech</keyword>
+    <keyword>whisper</keyword>
+    <keyword xml:lang="pt_BR">ditado</keyword>
+    <keyword xml:lang="pt_BR">voz</keyword>
+  </keywords>
+
+  <requires>
+    <display_length compare="ge">768</display_length>
+  </requires>
+  <supports>
+    <control>keyboard</control>
+    <control>pointing</control>
+  </supports>
+
   <content_rating type="oars-1.1"/>
+
   <releases>
-    <release version="0.1.0" date="2026-10-12"/>
+    <release version="0.1.0" date="2026-10-12">
+      <description>
+        <p>First release: dictation with Whisper and Claude Code, global shortcut, Insights dashboard and history.</p>
+      </description>
+    </release>
   </releases>
 </component>

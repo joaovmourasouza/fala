@@ -1,7 +1,9 @@
 id: io.github.joaovmourasouza.Fala
-runtime: org.freedesktop.Platform
-runtime-version: '25.08'
-sdk: org.freedesktop.Sdk
+runtime: org.kde.Platform
+runtime-version: '6.11'
+sdk: org.kde.Sdk
+base: com.riverbankcomputing.PyQt.BaseApp
+base-version: '6.11'
 command: fala
 finish-args:
   - --share=ipc
@@ -10,13 +12,19 @@ finish-args:
   - --device=dri
   # Microfone
   - --socket=pulseaudio
-  # Download do modelo Whisper e transcrição via Groq
+  # Download do modelo Whisper (Hugging Face) e transcrição opcional via Groq
   - --share=network
   # Imagem do painel exportada pelo botão Compartilhar
   - --filesystem=xdg-pictures
   - --talk-name=org.freedesktop.Notifications
-  # `claude -p` roda no sistema, com o login do Claude Code do usuário (flatpak-spawn --host)
+  # O ajuste do texto roda o `claude -p` (Claude Code) instalado no sistema do usuário,
+  # com o login dele, via flatpak-spawn --host. Veja flatpak/flathub-justification.md.
   - --talk-name=org.freedesktop.Flatpak
+
+cleanup-commands:
+  # O script do WebEngine primeiro: o cleanup-BaseApp.sh apaga a si mesmo e aos outros.
+  - /app/cleanup-BaseApp-QtWebEngine.sh
+  - /app/cleanup-BaseApp.sh
 
 modules:
   - name: portaudio
@@ -47,18 +55,17 @@ modules:
         url: https://github.com/bugaevc/wl-clipboard/archive/refs/tags/v2.2.1.tar.gz
         sha256: 6eb8081207fb5581d1d82c4bcd9587205a31a3d47bea3ebeb7f41aa1143783eb
 
+  - python3-deps.yaml
+
   - name: fala
     buildsystem: simple
-    build-options:
-      # Baixa as dependências Python do PyPI durante o build (ok para builds locais).
-      build-args:
-        - --share=network
     build-commands:
-      - pip3 install --prefix=${FLATPAK_DEST} --no-cache-dir '.[local]'
+      - pip3 install --prefix=${FLATPAK_DEST} --no-deps --no-build-isolation --no-index .
       - install -Dm644 data/${FLATPAK_ID}.desktop ${FLATPAK_DEST}/share/applications/${FLATPAK_ID}.desktop
       - install -Dm644 data/${FLATPAK_ID}.svg ${FLATPAK_DEST}/share/icons/hicolor/scalable/apps/${FLATPAK_ID}.svg
       - install -Dm644 data/${FLATPAK_ID}.metainfo.xml ${FLATPAK_DEST}/share/metainfo/${FLATPAK_ID}.metainfo.xml
     sources:
+      # Build local a partir da pasta do repositório.
       - type: dir
         path: ..
         skip:
