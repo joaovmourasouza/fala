@@ -1,10 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
-  <rect x="8" y="8" width="112" height="112" rx="28" fill="#1A5C5E"/>
-  <g fill="#F4F2EE">
-    <rect x="30" y="52" width="8" height="24" rx="4"/>
-    <rect x="44" y="40" width="8" height="48" rx="4"/>
-    <rect x="58" y="30" width="8" height="68" rx="4"/>
-    <rect x="72" y="44" width="8" height="40" rx="4"/>
-    <rect x="86" y="54" width="8" height="20" rx="4"/>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#22777A"/><stop offset="1" stop-color="#14494B"/></linearGradient>
+  </defs>
+  <rect x="8" y="10" width="112" height="112" rx="28" fill="#0E3A3C"/>
+  <rect x="8" y="6" width="112" height="112" rx="28" fill="url(#bg)"/>
+  <path d="M34 28h60a14 14 0 0 1 14 14v34a14 14 0 0 1-14 14H58l-18 14v-14h-6a14 14 0 0 1-14-14V42a14 14 0 0 1 14-14z" fill="#F7F4EE"/>
+  <g fill="#1A5C5E">
+    <rect x="38" y="53" width="7" height="12" rx="3.5"/>
+    <rect x="49" y="45" width="7" height="28" rx="3.5"/>
+    <rect x="60" y="38" width="7" height="42" rx="3.5"/>
+    <rect x="71" y="47" width="7" height="24" rx="3.5"/>
+    <rect x="82" y="52" width="7" height="14" rx="3.5"/>
   </g>
 </svg>

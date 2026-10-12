@@ -4,6 +4,7 @@ enviar teclas para outras janelas, registrar atalhos globais e rodar em segundo 
 import os
 import secrets
 import threading
+import time
 from collections.abc import Callable
 from pathlib import Path
 
@@ -75,7 +76,7 @@ class RemoteKeyboard:
     """Teclado virtual via portal RemoteDesktop.
 
     Na primeira vez o GNOME pergunta se o Fala pode controlar o teclado; o token de
-    restauração salvo evita a pergunta nas próximas sessões.
+    restauração salvo evita a pergunta nas próximas vezes.
     """
 
     DEVICE_KEYBOARD = 1
@@ -88,28 +89,29 @@ class RemoteKeyboard:
         self._session: str | None = None
 
     def ensure_session(self) -> None:
-        """Abre a sessão (pode mostrar o diálogo de permissão e bloquear até a resposta)."""
+        """Pede a permissão (diálogo do GNOME na primeira vez) e fecha a sessão em seguida."""
         with self._lock:
-            if self._session is None:
+            try:
                 self._start()
+            finally:
+                self._reset()
 
     def press(self, keycodes: list[int]) -> None:
-        """Pressiona as teclas em ordem e solta na ordem inversa (ex.: Ctrl+V)."""
+        """Pressiona as teclas em ordem e solta na ordem inversa (ex.: Ctrl+V).
+
+        A sessão só fica aberta durante a colagem: enquanto ela existe, o GNOME mostra o
+        indicador laranja de controle remoto na barra superior.
+        """
         with self._lock:
-            for attempt in range(2):
-                if self._session is None:
-                    self._start()
-                try:
-                    for code in keycodes:
-                        self._key(code, 1)
-                    for code in reversed(keycodes):
-                        self._key(code, 0)
-                    return
-                except Exception:
-                    # Sessão encerrada (ex.: permissão revogada); recria uma vez.
-                    self._reset()
-                    if attempt:
-                        raise
+            try:
+                self._start()
+                time.sleep(0.05)  # dá tempo para o teclado virtual ficar pronto
+                for code in keycodes:
+                    self._key(code, 1)
+                for code in reversed(keycodes):
+                    self._key(code, 0)
+            finally:
+                self._reset()
 
     def _key(self, keycode: int, state: int) -> None:
         msg = new_method_call(_portal("RemoteDesktop"), "NotifyKeyboardKeycode", "oa{sv}iu",
