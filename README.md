@@ -1,6 +1,6 @@
-# wispr-flow-clone
+# Fala
 
-Clone open-source do [Wispr Flow](https://wisprflow.ai): ditado por voz em qualquer app.
+Clone brasileiro do [Wispr Flow](https://wisprflow.ai): ditado por voz em qualquer app.
 Segure uma tecla de atalho, fale, solte — o texto transcrito (e limpo por um LLM) é digitado no campo em foco.
 
 ## Objetivos (MVP)
