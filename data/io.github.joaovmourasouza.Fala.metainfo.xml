@@ -7,6 +7,7 @@
   <summary>Ditado por voz em qualquer app</summary>
   <description>
     <p>Aperte um atalho, fale e o texto aparece no app em foco: transcrição com Whisper e ajuste com o Claude Code.</p>
+    <p>Sem API key: o claude do sistema é encontrado e ajusta o texto com o seu login do Claude Code.</p>
   </description>
   <launchable type="desktop-id">io.github.joaovmourasouza.Fala.desktop</launchable>
   <url type="homepage">https://github.com/joaovmourasouza/fala</url>

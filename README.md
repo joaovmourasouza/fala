@@ -5,6 +5,8 @@ Ditado por voz em qualquer app — um clone brasileiro do [Wispr Flow](https://w
 Aperte **Super+D** (de ditar) e fale: o Fala transcreve com Whisper, ajusta o texto com o Claude Code (`claude -p`)
 (pontuação, tira os "é...", "tipo", entende "às 3, não, às 4") e digita no app em foco.
 
+> **Sem API key:** o ajuste do texto usa o `claude` do sistema, que é encontrado automaticamente e ajusta o texto com o seu login do Claude Code. Nenhuma chave da Anthropic é necessária.
+
 ## Como funciona
 
 - **Atalho global** (padrão **Super+D**) registrado pelo portal de atalhos do GNOME:
