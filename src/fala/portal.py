@@ -199,3 +199,16 @@ def set_background_status(message: str) -> None:
     with connect() as conn:
         conn.send_and_get_reply(new_method_call(_portal("Background"), "SetStatus", "a{sv}",
                                                 ({"message": ("s", message)},)), timeout=5)
+
+
+def prefers_dark() -> bool | None:
+    """Preferência de tema do desktop (portal Settings): True escuro, False claro, None sem preferência."""
+    settings = DBusAddress(DESKTOP_PATH, bus_name="org.freedesktop.portal.Desktop",
+                           interface="org.freedesktop.portal.Settings")
+    with open_dbus_connection(bus="SESSION") as conn:
+        reply = conn.send_and_get_reply(
+            new_method_call(settings, "ReadOne", "ss", ("org.freedesktop.appearance", "color-scheme")), timeout=2)
+    if reply.header.message_type.name == "error":
+        return None
+    _, value = reply.body[0]  # variant (assinatura, valor): 0 = sem preferência, 1 = escuro, 2 = claro
+    return {1: True, 2: False}.get(value)

@@ -32,7 +32,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from . import history, stats
+from . import history, portal, stats
 from .config import CONFIG_PATH
 
 REPO_URL = "https://github.com/joaovmourasouza/fala"
@@ -857,6 +857,18 @@ def build_history_page(entries: list[history.Dictation], on_copy) -> QWidget:
 # ---------------------------------------------------------------- janela
 
 
+def _desktop_theme() -> str:
+    """Tema inicial igual ao do desktop. Lê o portal Settings direto: o Qt do pip nem sempre
+    enxerga a preferência do GNOME."""
+    try:
+        dark = portal.prefers_dark()
+    except Exception:
+        dark = None
+    if dark is None:
+        dark = QApplication.styleHints().colorScheme() == Qt.ColorScheme.Dark
+    return "dark" if dark else "light"
+
+
 class MainWindow(QWidget):
     quit_requested = pyqtSignal()
 
@@ -866,7 +878,7 @@ class MainWindow(QWidget):
         self.setWindowIcon(QIcon(icon_pixmap("logo", 64, "#1A5C5E")))
         self.resize(1400, 900)
         self.setMinimumSize(900, 640)
-        self._theme = "light"
+        self._theme = _desktop_theme()
         self._tab = 0
         self._build()
 
