@@ -1,2 +1,0 @@
-[console_scripts]
-fala = fala.__main__:main
