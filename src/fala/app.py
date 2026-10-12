@@ -192,9 +192,10 @@ class Fala(QObject):
 
 def run(config: Config) -> int:
     signal.signal(signal.SIGINT, signal.SIG_DFL)
+    # Precisa vir antes da QApplication: o Qt registra o app ID no portal do desktop ao iniciar.
+    QApplication.setApplicationName("Fala")
+    QApplication.setDesktopFileName("fala")
     app = QApplication(sys.argv)
-    app.setApplicationName("Fala")
-    app.setDesktopFileName("fala")
     app.setQuitOnLastWindowClosed(False)
     fala = Fala(config)  # noqa: F841 — precisa viver enquanto o app roda
     print("fala: pronto. Use `fala toggle` (ou o atalho configurado) para ditar.", file=sys.stderr)
