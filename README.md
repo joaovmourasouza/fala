@@ -2,7 +2,7 @@
 
 Ditado por voz em qualquer app — um clone brasileiro do [Wispr Flow](https://wisprflow.ai) para Linux.
 
-Aperte **Super+S**, fale, aperte de novo: o Fala transcreve com Whisper, ajusta o texto com o Claude Code (`claude -p`)
+Aperte **Super+D** (de ditar), fale, aperte de novo: o Fala transcreve com Whisper, ajusta o texto com o Claude Code (`claude -p`)
 (pontuação, tira os "é...", "tipo", entende "às 3, não, às 4") e cola no campo em foco.
 
 ## Como funciona
@@ -43,10 +43,9 @@ Se `ydotool` não conseguir acessar o socket do daemon, aponte para ele com `exp
 
 ```bash
 .venv/bin/fala                         # inicia o app (deixe rodando)
-scripts/setup-gnome-shortcut.sh        # cria o atalho Super+S → fala toggle
+scripts/setup-gnome-shortcut.sh        # cria o atalho Super+D → fala toggle
 ```
 
-O GNOME usa Super+S para abrir as Configurações rápidas; o script libera essa tecla (e mostra como desfazer).
 Para outro atalho: `scripts/setup-gnome-shortcut.sh '<Control><Alt>space'`.
 
 Outros comandos: `fala start`, `fala stop`, `fala cancel`, `fala quit`.

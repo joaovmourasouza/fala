@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Cria um atalho de teclado no GNOME que roda `fala toggle`.
-# Uso: scripts/setup-gnome-shortcut.sh ['<Super>s']
+# Uso: scripts/setup-gnome-shortcut.sh ['<Super>d']
 set -euo pipefail
 
-BINDING="${1:-<Super>s}"
+BINDING="${1:-<Super>d}"
 FALA_BIN="$(command -v fala || true)"
 if [[ -z "$FALA_BIN" ]]; then
   FALA_BIN="$(cd "$(dirname "$0")/.." && pwd)/.venv/bin/fala"
@@ -21,13 +21,6 @@ if [[ "$existing" != *"$KEY_PATH"* ]]; then
     updated="${existing%]}, '$KEY_PATH']"
   fi
   gsettings set "$SCHEMA" custom-keybindings "$updated"
-fi
-
-# Super+S abre as Configurações rápidas no GNOME; libera a tecla se for o atalho escolhido.
-QS_SCHEMA=org.gnome.shell.keybindings
-if [[ "$(gsettings get "$QS_SCHEMA" toggle-quick-settings)" == *"'$BINDING'"* ]]; then
-  gsettings set "$QS_SCHEMA" toggle-quick-settings "[]"
-  echo "$BINDING removido das Configurações rápidas do GNOME (desfazer: gsettings reset $QS_SCHEMA toggle-quick-settings)"
 fi
 
 gsettings set "$SCHEMA.custom-keybinding:$KEY_PATH" name "Fala: ditar"
