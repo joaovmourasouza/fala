@@ -1,7 +1,8 @@
-import os
-from pathlib import Path
+"""Ajuste do texto ditado usando o Claude Code em modo headless (`claude -p`)."""
 
-import anthropic
+import shutil
+import subprocess
+import tempfile
 
 SYSTEM_PROMPT = """\
 Você é o pós-processador de um app de ditado por voz. Você recebe a transcrição bruta do que a \
@@ -20,33 +21,37 @@ pergunta ou um pedido, devolva a pergunta ou o pedido limpo, sem respondê-lo.
 - Responda apenas com o texto final, sem aspas, comentários ou explicações."""
 
 
-def has_anthropic_credentials() -> bool:
-    """Chave/token no ambiente ou perfil salvo por `ant auth login`."""
-    if os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_AUTH_TOKEN"):
-        return True
-    config_home = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config"))
-    return any((config_home / "anthropic").glob("**/*"))
+def claude_available() -> bool:
+    return shutil.which("claude") is not None
 
 
 class Cleaner:
-    def __init__(self, model: str, effort: str):
+    def __init__(self, model: str, effort: str, timeout: float = 60):
         self._model = model
         self._effort = effort
-        self._client: anthropic.Anthropic | None = None
+        self._timeout = timeout
 
     def clean(self, text: str) -> str:
-        if self._client is None:
-            self._client = anthropic.Anthropic(timeout=30.0, max_retries=1)
-        response = self._client.beta.messages.create(
-            model=self._model,
-            max_tokens=4096,
-            system=SYSTEM_PROMPT,
-            output_config={"effort": self._effort},
-            betas=["server-side-fallback-2026-07-01"],
-            fallbacks="default",
-            messages=[{"role": "user", "content": f"<transcricao>\n{text}\n</transcricao>"}],
-        )
-        if response.stop_reason == "refusal":
-            return text
-        cleaned = "".join(block.text for block in response.content if block.type == "text").strip()
-        return cleaned or text
+        cmd = [
+            "claude", "-p",
+            "--model", self._model,
+            "--effort", self._effort,
+            "--system-prompt", SYSTEM_PROMPT,
+            "--tools", "",
+            "--strict-mcp-config",
+            "--setting-sources", "",
+            "--no-session-persistence",
+        ]
+        # Roda fora de qualquer projeto para não carregar CLAUDE.md de lugar nenhum.
+        with tempfile.TemporaryDirectory(prefix="fala-") as cwd:
+            result = subprocess.run(
+                cmd,
+                input=f"<transcricao>\n{text}\n</transcricao>",
+                capture_output=True,
+                text=True,
+                cwd=cwd,
+                timeout=self._timeout,
+            )
+        if result.returncode != 0:
+            raise RuntimeError(result.stderr.strip() or result.stdout.strip() or f"claude saiu com código {result.returncode}")
+        return result.stdout.strip() or text

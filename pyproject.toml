@@ -13,7 +13,6 @@ dependencies = [
     "PyQt6>=6.7",
     "sounddevice>=0.5",
     "numpy>=1.26",
-    "anthropic>=1.0",
     "httpx>=0.27",
 ]
 

@@ -2,7 +2,7 @@
 
 Ditado por voz em qualquer app — um clone brasileiro do [Wispr Flow](https://wisprflow.ai) para Linux.
 
-Aperte o atalho, fale, aperte de novo: o Fala transcreve com Whisper, ajusta o texto com o Claude
+Aperte **Super+S**, fale, aperte de novo: o Fala transcreve com Whisper, ajusta o texto com o Claude Code (`claude -p`)
 (pontuação, tira os "é...", "tipo", entende "às 3, não, às 4") e cola no campo em foco.
 
 ## Como funciona
@@ -13,7 +13,7 @@ atalho do GNOME ──► fala toggle ──► socket ──► app (PyQt6)
                      microfone (sounddevice) ◄──┤ gravando: pílula com medidor de volume
                                                 │
                   Whisper (local ou Groq)  ◄────┤ transcrevendo…
-                  Claude (ajuste do texto) ◄────┤ ajustando texto…
+                  claude -p (ajuste)       ◄────┤ ajustando texto…
                                                 │
                      wl-copy + ydotool Ctrl+V ◄─┘ texto aparece no app em foco
 ```
@@ -33,11 +33,8 @@ python3 -m venv .venv
 .venv/bin/pip install -e '.[local]'     # sem [local] se for usar só a Groq
 ```
 
-Para o ajuste com IA, exporte sua chave da Anthropic (sem ela o Fala usa a transcrição bruta):
-
-```bash
-export ANTHROPIC_API_KEY=sk-ant-...
-```
+O ajuste com IA usa o [Claude Code](https://claude.com/claude-code) já logado na sua máquina (`claude -p`).
+Sem o comando `claude` no PATH, o Fala usa a transcrição bruta.
 
 Se `ydotool` não conseguir acessar o socket do daemon, aponte para ele com `export YDOTOOL_SOCKET=/tmp/.ydotool_socket`
 (o caminho depende de como o serviço foi configurado).
@@ -46,8 +43,11 @@ Se `ydotool` não conseguir acessar o socket do daemon, aponte para ele com `exp
 
 ```bash
 .venv/bin/fala                         # inicia o app (deixe rodando)
-scripts/setup-gnome-shortcut.sh        # cria o atalho Ctrl+Alt+Espaço → fala toggle
+scripts/setup-gnome-shortcut.sh        # cria o atalho Super+S → fala toggle
 ```
+
+O GNOME usa Super+S para abrir as Configurações rápidas; o script libera essa tecla (e mostra como desfazer).
+Para outro atalho: `scripts/setup-gnome-shortcut.sh '<Control><Alt>space'`.
 
 Outros comandos: `fala start`, `fala stop`, `fala cancel`, `fala quit`.
 
@@ -61,9 +61,9 @@ Copie `config.example.toml` para `~/.config/fala/config.toml`. Principais opçõ
 |---|---|---|
 | `transcriber` | `local` | `local` (faster-whisper) ou `groq` (API, precisa de `GROQ_API_KEY`) |
 | `whisper_model` | `small` / `whisper-large-v3-turbo` | modelo do Whisper |
-| `cleanup` | `true` | ajuste do texto com Claude |
-| `claude_model` | `claude-opus-5-5` | modelo do Claude |
-| `claude_effort` | `low` | `low` deixa o ajuste mais rápido |
+| `cleanup` | `true` | ajuste do texto com `claude -p` |
+| `claude_model` | `claude-opus-5-5` | modelo passado em `--model` (aceita `opus`, `sonnet`, `haiku`) |
+| `claude_effort` | `low` | passado em `--effort`; `low` deixa o ajuste mais rápido |
 | `paste_keys` | `ctrl+v` | use `ctrl+shift+v` se dita muito em terminais |
 
 ## Roadmap

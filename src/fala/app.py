@@ -12,7 +12,7 @@ from PyQt6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
 
 from . import inject
 from .audio import SAMPLE_RATE, Recorder
-from .cleanup import Cleaner, has_anthropic_credentials
+from .cleanup import Cleaner, claude_available
 from .config import Config
 from .ipc import CommandServer
 from .overlay import Overlay
@@ -93,9 +93,9 @@ class Fala(QObject):
         self.tray.show()
 
     def _warmup(self) -> None:
-        if self.cleaner and not has_anthropic_credentials():
+        if self.cleaner and not claude_available():
             self.cleaner = None
-            notify("Sem ANTHROPIC_API_KEY: ajuste com IA desativado, usando a transcrição bruta.")
+            notify("Comando `claude` não encontrado: ajuste com IA desativado, usando a transcrição bruta.")
         try:
             self.transcriber.load()
         except Exception as e:
