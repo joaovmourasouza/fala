@@ -68,4 +68,4 @@ modules:
       - type: git
         url: https://github.com/joaovmourasouza/fala.git
         tag: v0.1.0
-        commit: COMMIT_DA_TAG
+        commit: 4c8f092b465619d741479b8d4280aca15e0710d9
