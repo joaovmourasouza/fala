@@ -14,8 +14,6 @@ finish-args:
   - --socket=pulseaudio
   # Download do modelo Whisper (Hugging Face) e transcrição opcional via Groq
   - --share=network
-  # Imagem do painel exportada pelo botão Compartilhar
-  - --filesystem=xdg-pictures
   - --talk-name=org.freedesktop.Notifications
   # O ajuste do texto roda o `claude -p` (Claude Code) instalado no sistema do usuário,
   # com o login dele, via flatpak-spawn --host. Veja flatpak/flathub-justification.md.

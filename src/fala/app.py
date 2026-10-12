@@ -85,7 +85,6 @@ class Fala(QObject):
         self.max_timer.timeout.connect(self.stop)
 
         self.window = MainWindow()
-        self.window.quit_requested.connect(QApplication.quit)
         self.recorded.connect(self._on_recorded)
 
         self._key_down = False

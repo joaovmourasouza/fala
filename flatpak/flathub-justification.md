@@ -13,7 +13,6 @@ Claude Code and pasted into the focused window.
 | `--socket=wayland`, `--socket=fallback-x11`, `--share=ipc`, `--device=dri` | Qt GUI (dashboard window and recording overlay) |
 | `--socket=pulseaudio` | Microphone capture |
 | `--share=network` | Downloads the Whisper model from Hugging Face on first use; optional Groq transcription API |
-| `--filesystem=xdg-pictures` | The "Share" button saves a PNG of the stats dashboard to the Pictures folder |
 | `--talk-name=org.freedesktop.Notifications` | Error/status notifications |
 | `--talk-name=org.freedesktop.Flatpak` | See below |
 

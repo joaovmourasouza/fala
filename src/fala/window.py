@@ -6,7 +6,7 @@ import os
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
-from PyQt6.QtCore import QPointF, QRectF, QSize, QStandardPaths, Qt, QTimer, QUrl, pyqtSignal
+from PyQt6.QtCore import QPointF, QRectF, QSize, Qt, QTimer, QUrl, pyqtSignal
 from PyQt6.QtGui import (
     QColor,
     QDesktopServices,
@@ -41,46 +41,46 @@ NARROW_WIDTH = 1000  # abaixo disso (largura da janela), os cards empilham
 
 THEMES = {
     "light": {
-        "outer": "#F2F0EB",
-        "panel": "#FBFAF7",
-        "card": "#F4F2EE",
-        "border": "#E6E3DD",
-        "divider": "#D9D5CE",
-        "text": "#1F1F1F",
-        "muted": "#6E6B66",
-        "track": "#E4E0D9",
-        "active": "#E8E5DF",
-        "bars": ["#1A5C5E", "#3A9488", "#6CBFB2"],
-        "heat": ["#CFEBEA", "#7CC5B8", "#3A9488", "#1A5C5E"],
-        "missed": "#D6CEC1",
-        "future": "#EEEAE3",
-        "streak_outline": "#123F41",
-        "badge_bg": "#DFF5EC",
-        "badge_fg": "#1A7A5A",
+        "outer": "#F3F2F7",
+        "panel": "#FBFBFD",
+        "card": "#F5F4FA",
+        "border": "#E5E3EE",
+        "divider": "#D8D6E3",
+        "text": "#1E1E24",
+        "muted": "#6C6A78",
+        "track": "#E3E1EC",
+        "active": "#E7E5F0",
+        "bars": ["#3B3D8F", "#5B5FC7", "#8F93E3"],
+        "heat": ["#DCDDF8", "#A9ACEE", "#6E72D6", "#3B3D8F"],
+        "missed": "#D9D6E6",
+        "future": "#EFEEF5",
+        "streak_outline": "#2A2C6B",
+        "badge_bg": "#E7E8FB",
+        "badge_fg": "#3B3D8F",
         "on_teal": "#FFFFFF",
-        "toast_bg": "#1F1F1F",
+        "toast_bg": "#1E1E24",
         "toast_fg": "#FFFFFF",
     },
     "dark": {
-        "outer": "#151716",
-        "panel": "#1C1F1E",
-        "card": "#232726",
-        "border": "#2F3432",
-        "divider": "#3A3F3D",
-        "text": "#ECEAE6",
-        "muted": "#9C9A94",
-        "track": "#343937",
-        "active": "#2B302E",
-        "bars": ["#2F8C85", "#2A7069", "#285955"],
-        "heat": ["#1F4441", "#2C6E68", "#3A9C91", "#5CC7B8"],
-        "missed": "#3A3631",
-        "future": "#222524",
-        "streak_outline": "#A8E6DC",
-        "badge_bg": "#1C3A30",
-        "badge_fg": "#7FD9B5",
+        "outer": "#151519",
+        "panel": "#1C1C21",
+        "card": "#232329",
+        "border": "#303038",
+        "divider": "#3B3B45",
+        "text": "#ECEBF2",
+        "muted": "#9D9BAA",
+        "track": "#36363F",
+        "active": "#2C2C34",
+        "bars": ["#7A7EE0", "#5F63C4", "#4A4DA0"],
+        "heat": ["#2B2C52", "#3F4290", "#6064C8", "#9A9DF0"],
+        "missed": "#34323C",
+        "future": "#222228",
+        "streak_outline": "#C9CBF8",
+        "badge_bg": "#2A2B4D",
+        "badge_fg": "#B9BCF6",
         "on_teal": "#FFFFFF",
-        "toast_bg": "#ECEAE6",
-        "toast_fg": "#1F1F1F",
+        "toast_bg": "#ECEBF2",
+        "toast_fg": "#1E1E24",
     },
 }
 
@@ -124,13 +124,7 @@ def _paint_glyph(p: QPainter, name: str, s: float) -> None:
     """Glifos desenhados à mão para o que o Adwaita não tem. Coordenadas em um quadrado s×s."""
     p.setBrush(Qt.BrushStyle.NoBrush)
     k = s / 24
-    if name == "logo":
-        p.setBrush(p.pen().color())
-        p.setPen(Qt.PenStyle.NoPen)
-        for i, h in enumerate([10, 16, 22, 14, 18, 8]):
-            x = (2 + i * 3.6) * k
-            p.drawRoundedRect(QRectF(x, (24 - h) / 2 * k, 2.2 * k, h * k), 1.1 * k, 1.1 * k)
-    elif name == "chart":
+    if name == "chart":
         p.drawRoundedRect(QRectF(3 * k, 3 * k, 18 * k, 18 * k), 3 * k, 3 * k)
         for x, top in ((8, 11), (12, 7), (16, 13)):
             p.drawLine(QPointF(x * k, top * k), QPointF(x * k, 17 * k))
@@ -173,16 +167,6 @@ def _paint_glyph(p: QPainter, name: str, s: float) -> None:
         path.cubicTo(14.8 * k, 11.8 * k, 12 * k, 11.8 * k, 12 * k, 14 * k)
         p.drawPath(path)
         p.drawPoint(QPointF(12 * k, 17.2 * k))
-    elif name == "share":
-        p.drawLine(QPointF(12 * k, 3 * k), QPointF(12 * k, 15 * k))
-        p.drawLine(QPointF(7.5 * k, 7.5 * k), QPointF(12 * k, 3 * k))
-        p.drawLine(QPointF(16.5 * k, 7.5 * k), QPointF(12 * k, 3 * k))
-        path = QPainterPath()
-        path.moveTo(5 * k, 11 * k)
-        path.lineTo(5 * k, 20 * k)
-        path.lineTo(19 * k, 20 * k)
-        path.lineTo(19 * k, 11 * k)
-        p.drawPath(path)
 
 
 @functools.cache
@@ -341,7 +325,7 @@ class CategoryRow(QWidget):
     def __init__(self, icon: str, share: float, max_share: float, rank: int, label: str):
         super().__init__()
         self._icon, self._share, self._max, self._rank, self._label = icon, share, max_share, rank, label
-        self.setFixedHeight(32)
+        self.setFixedHeight(28)
 
     def paintEvent(self, event) -> None:
         p = QPainter(self)
@@ -380,7 +364,7 @@ class Heatmap(QWidget):
         self._prev_rect = QRectF()
         self._next_rect = QRectF()
         self.setMouseTracking(True)
-        self.setFixedHeight(268)
+        self.setFixedHeight(232)
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
 
     def _range(self) -> tuple[date, date]:
@@ -504,59 +488,6 @@ class Heatmap(QWidget):
         p.setBrush(Qt.BrushStyle.NoBrush)
         p.setPen(QPen(QColor(T["streak_outline"]), 1.4))
         p.drawRoundedRect(QRectF(tx - 30, ly - 2, 20, 20), 4, 4)
-
-
-class ShareBadge(QWidget):
-    clicked = pyqtSignal()
-    TEXT = "COMPARTILHAR • COMPARTILHAR • "
-
-    def __init__(self):
-        super().__init__()
-        self.setFixedSize(76, 76)
-        self.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.setToolTip("Salvar imagem do painel")
-        self._angle = 0.0
-        self._timer = QTimer(self, interval=33)
-        self._timer.timeout.connect(self._spin)
-
-    def _spin(self) -> None:
-        self._angle = (self._angle + 1.2) % 360
-        self.update()
-
-    def enterEvent(self, event) -> None:
-        self._timer.start()
-
-    def leaveEvent(self, event) -> None:
-        self._timer.stop()
-
-    def mousePressEvent(self, event) -> None:
-        self.clicked.emit()
-
-    def paintEvent(self, event) -> None:
-        p = QPainter(self)
-        p.setRenderHint(QPainter.RenderHint.Antialiasing)
-        c = QPointF(self.width() / 2, self.height() / 2)
-        r = self.width() / 2 - 1
-        p.setPen(Qt.PenStyle.NoPen)
-        p.setBrush(QColor(T["active"]))
-        p.drawEllipse(c, r, r)
-        p.setPen(QColor(T["bars"][0]))
-        p.setFont(make_font(8.5, QFont.Weight.Bold, 0.5))
-        fm = p.fontMetrics()
-        text_r = r - 9
-        total = sum(fm.horizontalAdvance(ch) for ch in self.TEXT)
-        angle = self._angle - 90
-        for ch in self.TEXT:
-            w = fm.horizontalAdvance(ch)
-            step = w / total * 360
-            a = math.radians(angle + step / 2)
-            p.save()
-            p.translate(c.x() + text_r * math.cos(a), c.y() + text_r * math.sin(a))
-            p.rotate(angle + step / 2 + 90)
-            p.drawText(QPointF(-w / 2, fm.ascent() / 2 - 1), ch)
-            p.restore()
-            angle += step
-        p.drawPixmap(c - QPointF(12, 12), icon_pixmap("share", 24, T["text"]))
 
 
 class Tabs(QWidget):
@@ -694,8 +625,8 @@ def build_usage_page(s: stats.Stats, first_day: date | None, narrow: bool = Fals
     page = QWidget()
     grid = QGridLayout(page)
     grid.setContentsMargins(0, 0, 0, 0)
-    grid.setHorizontalSpacing(26)
-    grid.setVerticalSpacing(26)
+    grid.setHorizontalSpacing(20)
+    grid.setVerticalSpacing(20)
     for col, stretch in enumerate((1, 1, 1, 1)):
         grid.setColumnStretch(col, stretch)
 
@@ -712,7 +643,7 @@ def build_usage_page(s: stats.Stats, first_day: date | None, narrow: bool = Fals
     # Palavras por minuto
     wpm_card = Card()
     v = QVBoxLayout(wpm_card)
-    v.setContentsMargins(24, 22, 24, 18)
+    v.setContentsMargins(22, 18, 22, 14)
     v.addLayout(_stat_header(
         stats.format_int(round(s.wpm)),
         "Palavras por minuto",
@@ -725,11 +656,11 @@ def build_usage_page(s: stats.Stats, first_day: date | None, narrow: bool = Fals
     # Correções
     fix_card = Card()
     v = QVBoxLayout(fix_card)
-    v.setContentsMargins(24, 22, 24, 22)
+    v.setContentsMargins(22, 18, 22, 18)
     v.addLayout(_stat_header(stats.format_int(s.fixes.total), "Correções feitas pela Fala"))
-    v.addSpacing(14)
+    v.addSpacing(10)
     v.addWidget(Divider())
-    v.addSpacing(14)
+    v.addSpacing(10)
     for value, text, tip in (
         (s.fixes.corrected, "palavras corrigidas", "Palavras da transcrição que o ajuste trocou ou removeu."),
         (s.fixes.fillers, "muletas removidas", "Hesitações como “hã”, “tipo” e “né” que saíram do texto."),
@@ -746,7 +677,7 @@ def build_usage_page(s: stats.Stats, first_day: date | None, narrow: bool = Fals
     # Total de palavras
     total_card = Card()
     v = QVBoxLayout(total_card)
-    v.setContentsMargins(24, 22, 24, 22)
+    v.setContentsMargins(22, 18, 22, 18)
     top = QHBoxLayout()
     top.addLayout(_stat_header(stats.format_int(s.total_words), "Total de palavras ditadas"))
     if s.month_growth is not None:
@@ -757,11 +688,11 @@ def build_usage_page(s: stats.Stats, first_day: date | None, narrow: bool = Fals
         badge.setStyleSheet(f"color: {T['badge_fg']}; background: {T['badge_bg']}; border-radius: 4px; padding: 3px 8px;")
         top.addWidget(badge, 0, Qt.AlignmentFlag.AlignTop)
     v.addLayout(top)
-    v.addSpacing(14)
+    v.addSpacing(10)
     v.addWidget(Divider())
-    v.addSpacing(14)
+    v.addSpacing(10)
     v.addWidget(text_label(stats.written_message(s.total_words), 16))
-    v.addSpacing(14)
+    v.addSpacing(10)
     v.addStretch()
     v.addWidget(SplitBar(
         ("document-open-recent-symbolic", f"Tempo economizado {stats.format_duration(s.saved_seconds)}", s.saved_seconds),
@@ -773,13 +704,13 @@ def build_usage_page(s: stats.Stats, first_day: date | None, narrow: bool = Fals
     # Uso por tipo
     usage_card = Card()
     v = QVBoxLayout(usage_card)
-    v.setContentsMargins(24, 22, 24, 26)
+    v.setContentsMargins(22, 18, 22, 18)
     head = QHBoxLayout()
     head.addWidget(text_label("Uso por tipo", 30, weight=QFont.Weight.Medium))
     head.addStretch()
     head.addWidget(caps_label(f"Total de ditados | {stats.format_int(s.dictations)}", "text", 13))
     v.addLayout(head)
-    v.addSpacing(18)
+    v.addSpacing(12)
     total = sum(s.categories.values())
     shares = sorted(
         ((s.categories.get(key, 0) / total if total else 0, key) for key, *_ in CATEGORY_INFO),
@@ -790,7 +721,7 @@ def build_usage_page(s: stats.Stats, first_day: date | None, narrow: bool = Fals
     for rank, (share, key) in enumerate(shares):
         icon, label = info[key]
         v.addWidget(CategoryRow(icon, share, max_share, rank, f"{stats.format_int(s.categories.get(key, 0))} {label}"))
-        v.addSpacing(12)
+        v.addSpacing(6)
     v.addStretch()
     lower = total_row + 1
     grid.addWidget(usage_card, lower, 0, 1, 4 if narrow else 2)
@@ -798,7 +729,7 @@ def build_usage_page(s: stats.Stats, first_day: date | None, narrow: bool = Fals
     # Sequência
     streak_card = Card()
     v = QVBoxLayout(streak_card)
-    v.setContentsMargins(24, 22, 24, 22)
+    v.setContentsMargins(22, 18, 22, 18)
     head = QHBoxLayout()
     days = s.current_streak
     head.addWidget(text_label(f"{days} {'dia seguido' if days == 1 else 'dias seguidos'}", 30, weight=QFont.Weight.Medium))
@@ -806,7 +737,7 @@ def build_usage_page(s: stats.Stats, first_day: date | None, narrow: bool = Fals
     longest = s.longest_streak
     head.addWidget(caps_label(f"Maior sequência | {longest} {'dia' if longest == 1 else 'dias'}", "text", 13))
     v.addLayout(head)
-    v.addSpacing(16)
+    v.addSpacing(10)
     v.addWidget(Heatmap(s, first_day))
     v.addStretch()
     grid.addWidget(streak_card, lower + 1 if narrow else lower, 0 if narrow else 2, 1, 4 if narrow else 2)
@@ -869,15 +800,16 @@ def _desktop_theme() -> str:
     return "dark" if dark else "light"
 
 
-class MainWindow(QWidget):
-    quit_requested = pyqtSignal()
+APP_ICON = Path(__file__).parent / "icons" / "fala.svg"
 
+
+class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Fala")
-        self.setWindowIcon(QIcon(icon_pixmap("logo", 64, "#1A5C5E")))
-        self.resize(1400, 900)
-        self.setMinimumSize(900, 640)
+        self.setWindowIcon(QIcon(str(APP_ICON)))
+        self.resize(self.sizeHint())
+        self.setMinimumSize(900, 600)
         self._theme = _desktop_theme()
         self._tab = 0
         self._build()
@@ -903,8 +835,10 @@ class MainWindow(QWidget):
         side = QVBoxLayout()
         side.setSpacing(8)
         side.addSpacing(12)
-        side.addWidget(icon_label("logo", 26), 0, Qt.AlignmentFlag.AlignHCenter)
-        side.addSpacing(30)
+        logo = QLabel()
+        logo.setPixmap(QIcon(str(APP_ICON)).pixmap(QSize(34, 34), self.devicePixelRatio()))
+        side.addWidget(logo, 0, Qt.AlignmentFlag.AlignHCenter)
+        side.addSpacing(26)
         self._nav = []
         for icon, tip, index in (("chart", "Insights", 0), ("document-open-recent-symbolic", "Histórico", 1)):
             button = SideButton(icon, tip)
@@ -915,7 +849,6 @@ class MainWindow(QWidget):
         for icon, tip, slot in (
             ("emblem-system-symbolic", "Configurações", self._open_settings),
             ("question", "Ajuda", lambda: QDesktopServices.openUrl(QUrl(REPO_URL))),
-            ("application-exit-symbolic", "Sair do Fala", self.quit_requested.emit),
         ):
             button = SideButton(icon, tip)
             button.clicked.connect(slot)
@@ -953,7 +886,7 @@ class MainWindow(QWidget):
 
         holder = QWidget()
         hl = QHBoxLayout(holder)
-        hl.setContentsMargins(40, 36, 40, 40)
+        hl.setContentsMargins(36, 22, 36, 28)
         self._content = QWidget()
         self._content.setMaximumWidth(CONTENT_MAX_WIDTH)
         hl.addWidget(self._content)
@@ -966,18 +899,12 @@ class MainWindow(QWidget):
         title = text_label("Insights", 22, weight=QFont.Weight.Medium)
         header.addWidget(title, 0, Qt.AlignmentFlag.AlignVCenter)
         header.addStretch()
-        self._badge = ShareBadge()
-        self._badge.clicked.connect(self.share)
-        policy = self._badge.sizePolicy()
-        policy.setRetainSizeWhenHidden(True)
-        self._badge.setSizePolicy(policy)
-        header.addWidget(self._badge)
         cv.addLayout(header)
         cv.addSpacing(10)
         self._tabs = Tabs(["Seu uso", "Histórico"])
         self._tabs.changed.connect(self.set_tab)
         cv.addWidget(self._tabs)
-        cv.addSpacing(34)
+        cv.addSpacing(20)
         self._stack = QStackedWidget()
         cv.addWidget(self._stack, 1)
 
@@ -1015,28 +942,10 @@ class MainWindow(QWidget):
         for i, button in enumerate(self._nav):
             button.active = i == index
             button.update()
-        self._badge.setVisible(index == 0)
 
     def toggle_theme(self) -> None:
         self._theme = "dark" if self._theme == "light" else "light"
         self._build()
-
-    def share(self) -> None:
-        pictures = QStandardPaths.writableLocation(QStandardPaths.StandardLocation.PicturesLocation)
-        folder = Path(pictures or Path.home())
-        folder.mkdir(parents=True, exist_ok=True)
-        path = folder / f"fala-insights-{datetime.now():%Y%m%d-%H%M%S}.png"
-        shot = self._content.grab()
-        margin = 40
-        image = QPixmap(shot.width() + 2 * margin, shot.height() + 2 * margin)
-        image.fill(QColor(T["panel"]))
-        painter = QPainter(image)
-        painter.drawPixmap(margin, margin, shot)
-        painter.end()
-        if image.save(str(path)):
-            self._toast.show_message(f"Imagem salva em {path}")
-        else:
-            self._toast.show_message("Não foi possível salvar a imagem.")
 
     def _copy(self, text: str) -> None:
         QApplication.clipboard().setText(text)
@@ -1070,4 +979,8 @@ class MainWindow(QWidget):
             self._toast.move((self.width() - self._toast.width()) // 2, self.height() - self._toast.height() - 28)
 
     def sizeHint(self) -> QSize:
-        return QSize(1400, 900)
+        screen = QApplication.primaryScreen()
+        if screen is None:
+            return QSize(1280, 820)
+        area = screen.availableGeometry()
+        return QSize(min(1280, int(area.width() * 0.85)), min(820, int(area.height() * 0.88)))
