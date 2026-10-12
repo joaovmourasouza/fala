@@ -44,6 +44,7 @@ Se `ydotool` não conseguir acessar o socket do daemon, aponte para ele com `exp
 ```bash
 .venv/bin/fala                         # inicia o app (deixe rodando)
 scripts/setup-gnome-shortcut.sh        # cria o atalho Super+D → fala toggle
+scripts/install-desktop-entry.sh       # registra o app no GNOME (lista de apps, portal)
 ```
 
 Para outro atalho: `scripts/setup-gnome-shortcut.sh '<Control><Alt>space'`.
